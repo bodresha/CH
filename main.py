@@ -13,14 +13,23 @@ class FollowersIDScraper:
         self.clubhouse.start_phone_number_auth(phone_num)
         self.clubhouse.call_phone_number_auth(phone_num)
         verification_code = input('Enter the code you received: ')
-        a = self.clubhouse.complete_phone_number_auth(phone_num, verification_code)
-        print(a)
-        return a
+        authorization_json = self.clubhouse.complete_phone_number_auth(phone_num, verification_code)
+        user_id = authorization_json['user_profile']['user_id']
+        user_token = authorization_json['auth_token']
+        self.clubhouse.__init__(user_id, user_token)
 
     def get_followers(self, account_id):
-        return self.clubhouse.get_followers(account_id, page_size=500, page=1)
+        a = self.clubhouse.get_followers(account_id, page_size=50, page=1)
+        print(f'Get followers\n{a}')
+        return a
 
-    def scrape_followers(self, account_id, csv_filename='output.csv', json_filename='output.json'):
+    def get_user_id(self, username):
+        a = self.clubhouse.search_users(username)
+        print(f'Get user\n{a}')
+        return a
+
+    def scrape_followers(self, username, csv_filename='output.csv', json_filename='output.json'):
+        account_id = self.get_user_id(username)
         followers = self.get_followers(account_id)
         with open(csv_filename, 'a+') as csv_file:
             writer = csv.writer(csv_file)
@@ -37,5 +46,5 @@ class FollowersIDScraper:
 if __name__ == '__main__':
     c = FollowersIDScraper()
     c.login()
-    user_id = input('Enter the user id of the user: ')
-    c.scrape_followers(user_id)
+    searched_user_id = input('Enter the username to scrape followers: ')
+    c.scrape_followers(searched_user_id)
